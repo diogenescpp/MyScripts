@@ -1,0 +1,25 @@
+#!/bin/sh
+#usage 
+#Simple Nasty motion detection using imagemagick's compare  utility
+#Run this script inside a folder containing images you can generate them
+#using mplayer -vo jpeg VIDEO_FILE
+#difference Threshold must be integer and selected manually by trial an error
+
+lastF="Starting"
+targetDir=$2
+th=$1 
+if [ $# -lt 2 ]; then 
+  echo "Use $0 DifferenceThreshold(number) OutputDirectoryName(outside current directory)";
+  exit 0;
+fi 
+for current in $(ls -t);
+do
+if [ $lastF != "Starting" ]; then  
+   d=$( compare -metric RMSE $current $lastF /tmp/null 2>&1 | awk -F' ' '{print $1}' );
+   if [ "$( echo "$d>$th" |  bc -l )" == "1" ]; then
+      echo "MOV IN $current ?";
+      mv $current $targetDir; 
+   fi 
+fi
+lastF=$current;
+done  
